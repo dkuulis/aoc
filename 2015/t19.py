@@ -53,8 +53,8 @@ def main():
     rules = [(d["in"], d["out"]) for d in [re.match(pattern, line).groupdict() for line in lines[:-2]]]
     target = lines[-1]
 
-    #result1 = run1(rules, target)
-    #print(result1)
+    result1 = run1(rules, target)
+    print(result1)
 
     pure, rest = purify(rules)
     count, reminder = apply_pure(target, pure)
