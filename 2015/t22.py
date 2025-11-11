@@ -18,13 +18,13 @@ class State:
 
     turn: int
 
-spells = [
-    {"name": "Recharge", "cost": 229, "duration": 5, "damage": 0, "hp": 0, "shield": 0, "recharge": 101},
-    {"name": "Poison", "cost": 173, "duration": 6, "damage": 3, "hp": 0, "shield": 0, "recharge": 0},
-    {"name": "Shield", "cost": 113, "duration": 6, "damage": 0, "hp": 0, "shield": 7, "recharge": 0},
-    {"name": "Drain", "cost": 73, "duration": 1, "damage": 2, "hp": 2, "shield": 0, "recharge": 0},
-    {"name": "Missile", "cost": 53, "duration": 1, "damage": 4, "hp": 0, "shield": 0, "recharge": 0}
-]
+spells = ["Recharge", "Poison", "Shield", "Drain", "Missile"]
+costs = [229, 173, 113, 73, 53]
+durations = [5, 6, 6, 1, 1]
+damages = [0, 3, 0, 2, 4]
+hps = [0, 0, 0, 2, 0]
+shields = [0, 0, 7, 0, 0]
+recharges = [101, 0, 0, 0, 0]
 
 RECHARGE = 0
 POISON = 1
@@ -34,7 +34,7 @@ MISSILE = 4
 
 SPELL_COUNT = 5
 
-min_cost = min(spell["cost"] for spell in spells)
+min_cost = min(costs)
 boss_damage = 0
 
 def spell_stream(n: int):
@@ -61,17 +61,15 @@ def effects(state: State):
             state.spells[i] -= 1
 
             # apply
-            spell = spells[i]
-            state.boss_hp -= spell["damage"]
-            state.player_hp += spell["hp"]
-            state.player_mana += spell["recharge"]
+            state.boss_hp -= damages[i]
+            state.player_hp += hps[i]
+            state.player_mana += recharges[i]
 
     return state.boss_hp > 0
 
 def apply(state: State, spell_index: int):
 
-    spell = spells[spell_index]
-    cost = spell["cost"]
+    cost = costs[spell_index]
     state.player_mana -= cost
 
     # lose if out of mana
@@ -88,13 +86,13 @@ def apply(state: State, spell_index: int):
     if state.player_spend >= state.min_spend:
         return False
 
-    state.spells[spell_index] = spell["duration"]
+    state.spells[spell_index] = durations[spell_index]
 
     return True
 
 def boss(state: State):
-    shields = sum(spells[i]["shield"] if state.spells[i] > 0 else 0 for i in range(SPELL_COUNT))
-    damage = max(boss_damage - shields, 1)
+    armor = sum(shields[i] if state.spells[i] > 0 else 0 for i in range(SPELL_COUNT))
+    damage = max(boss_damage - armor, 1)
     state.player_hp -= damage
     return state.player_hp > 0 # no game end
 
@@ -110,7 +108,7 @@ def win(state):
     return state.boss_hp <= 0
 
 def report(i: int, state: State):
-    s = [spells[s]["name"] for s in spell_stream(i)]
+    s = [spells[s] for s in spell_stream(i)]
     print(s, state.boss_hp, state.player_hp, state.player_mana, state.turn, state.player_spend, state.min_spend) 
 
 def play(boss_hp):
