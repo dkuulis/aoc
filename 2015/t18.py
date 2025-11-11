@@ -59,15 +59,11 @@ def main():
     lines = lib.read_lines()
     size = len(lines)
 
-    #result1 = run1(lines, size)
-    #print(result1)
+    result1 = run1(lines, size)
+    print(result1)
 
     result2 = run2(lines, size)
     print(result2)
-
-
-
-
 
 if __name__ == "__main__":
     main()
