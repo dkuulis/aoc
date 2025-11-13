@@ -1,12 +1,12 @@
 import sys
 import re
 
-def _name(prefix):
+def _name(prefix: str) -> str:
     ext = ("." + prefix if prefix else "" ) + ".txt"
     filename = sys.argv[0].replace(".py", ext)
     return filename
 
-def read_lines(prefix = ""):
+def read_lines(prefix: str = "") -> list[list[str]]:
     filename = _name(prefix)
 
     with open(filename, 'r') as file:
@@ -14,7 +14,7 @@ def read_lines(prefix = ""):
 
     return [line.strip() for line in lines]
 
-def read_content(prefix = ""):
+def read_content(prefix: str = "") -> list[list[str]]:
     filename = _name(prefix)
 
     with open(filename, 'r') as file:
@@ -22,7 +22,7 @@ def read_content(prefix = ""):
 
     return content
 
-def ints(d):
+def ints(d: dict) -> dict:
     for k, v in d.items():
         try:
             d[k] = int(v)
