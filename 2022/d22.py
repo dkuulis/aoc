@@ -14,6 +14,15 @@ arrows = ">v<^"
 
 pattern = r"(?P<turn>[LR])|(?P<move>\d+)"
 
+def parse(lines):
+    global maze
+    global sizex
+    global sizey
+
+    sizey = len(lines)
+    sizex = max(len(line) for line in lines)
+    maze = [[decode[c] for c in (line + ' ' * sizex)[:sizex]] for line in lines]
+
 def hop(p, d):
     dx, dy = directions[d]
     return p[0] + dx, p[1] + dy
@@ -152,13 +161,7 @@ def main():
     path = lines[-1]
     lines = lines[:-2]
 
-    global maze
-    global sizex
-    global sizey
-
-    sizey = len(lines)
-    sizex = max(len(line) for line in lines)
-    maze = [[decode[c] for c in (line + ' ' * sizex)[:sizex]] for line in lines]
+    parse(lines)
 
     start = get_start()
 
@@ -171,6 +174,7 @@ def main():
     x, y, d, trace = navigate(start, path)
     result2= score(x, y, d)
     print(result2)
+
 
 if __name__ == "__main__":
     main()
