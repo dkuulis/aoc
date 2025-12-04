@@ -1,17 +1,17 @@
 import re
 import lib
 
-def joltage(bank, n):
-    l = len(bank)
+def joltage(bank, digits):
+    size = len(bank)
 
     result = 0
     index = 0
+    indexed = list(enumerate(bank))
 
-    for r in range(n): # r-th digit
-        stop = l - n + r + 1 # last+1 available char 
-        position, value = max(enumerate(bank[index:stop]), key=lambda x: x[1])
-        index += position + 1
-        result = result * 10 + value
+    for stop in range(size - digits, size):
+        index, value = max(indexed[index:stop+1], key=lambda x: x[1])
+        index += 1
+        result = result * 10 + value # acumulate
 
     return result
 
