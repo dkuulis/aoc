@@ -1,24 +1,21 @@
 import re
 import lib
 
-def check(s, f):
-    l = len(s)
+def check(s, size):
+    length = len(s)
 
-    if l % f != 0: # framents must fit exactly
+    if length % size != 0: # framents must fit exactly
         return False
 
-    n = l // f # number of fragments
-
-    for i in range(f): # each char in fragment
-        for j in range(1, n): # each fragment but the first
-            if s[i] != s[i+j*f]: # letter does't match
-                return False
+    for j in range(1, length // size): # each fragment but the first
+        if s[:size] != s[j*size:(j+1)*size]: # fragment does't match
+            return False
 
     return True
 
-def multi(s):
-    for f in range(1, len(s)//2+1): # fragment lengths
-        if check(s, f): # check each fragment length
+def multi(id):
+    for size in range(1, len(id)//2+1): # check each valid fragment size
+        if check(id, size):
             return True
 
     return False
