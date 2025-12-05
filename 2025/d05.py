@@ -7,9 +7,7 @@ def main():
     fresh = [tuple(map(int, line.split("-"))) for line in lines[:split]]
     ingredients = [int(line) for line in lines[split+1:]]
 
-    result1 = 0
-    for ingredient in ingredients:
-        result1 += 1 if  any(1 for r in fresh if r[0] <= ingredient and r[1] >= ingredient) else 0
+    result1 = sum(1 if any(1 for r in fresh if r[0] <= i and r[1] >= i) else 0 for i in ingredients)
     print(result1)
 
     result2 = 0
