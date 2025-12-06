@@ -7,20 +7,19 @@ def main():
     fresh = [tuple(map(int, line.split("-"))) for line in lines[:split]]
     ingredients = [int(line) for line in lines[split+1:]]
 
-    result1 = sum(1 if any(1 for r in fresh if r[0] <= i and r[1] >= i) else 0 for i in ingredients)
-    print(result1)
-
-    fresh.sort(key = lambda x: x[0])
+    fresh.sort(key = lambda x: x[0]) # sort by range lowest
     unified = []
-    start, end = 0, -1
-    for lo, hi in fresh:
-        if lo > end:
+    start, end = fresh[0]
+    for lo, hi in fresh[1:]:
+        if lo > end: # start a new unified range
             unified.append((start, end))
-            start = lo
-            end = hi
-        else:
+            start, end = lo, hi
+        else: # extend exisiting range
             end = max(end, hi)
     unified.append((start, end))
+
+    result1 = sum(1 if any(1 for r in unified if r[0] <= i and r[1] >= i) else 0 for i in ingredients)
+    print(result1)
 
     result2 = sum(hi-lo+1 for lo, hi in unified)
     print(result2)
