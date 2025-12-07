@@ -12,13 +12,13 @@ def read_lines(prefix: str = "") -> list[list[str]]:
     with open(filename, 'r') as file:
         lines = file.readlines()
 
-    return [line.rstrip() for line in lines]
+    return [line.rstrip("\n").rstrip("\r") for line in lines]
 
 def read_content(prefix: str = "") -> list[list[str]]:
     filename = _name(prefix)
 
     with open(filename, 'r') as file:
-        content = file.read().strip()
+        content = file.read().rstrip("\n").rstrip("\r")
 
     return content
 
