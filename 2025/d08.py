@@ -4,45 +4,52 @@ import lib
 def dsquared(p, q):
     return (p[0]-q[0])**2 + (p[1]-q[1])**2 + (p[2]-q[2])**2
 
-def part1(flattened, limit):
-    circuits: list[set[int]] = []
+def connect_closest(flattened: list[tuple[int, tuple[int,int]]], circuits: list[set[int]]):
+    closest = heapq.heappop(flattened)
+
+    i = closest[1][0]
+    ci = next(c for c in circuits if i in c)
+
+    j = closest[1][1]
+    cj = next(c for c in circuits if j in c)
+
+    if ci != cj:
+        ci.update(cj)
+        circuits.remove(cj)
+
+    return i, j
+
+def part1(flattened, circuits, limit):
     for _ in range(limit):
-        closest = heapq.heappop(flattened)
-
-        p1 = closest[1][0]
-        c1 = next((c for c in circuits if p1 in c), None)
-        p2 = closest[1][1]
-        c2 = next((c for c in circuits if p2 in c), None)
-
-        if c1 is None and c2 is None:
-            circuits.append({p1, p2})
-        elif c1 is None:
-            c2.add(p1)
-        elif c2 is None:
-            c1.add(p2)
-        elif c1 != c2:
-            c1.update(c2)
-            circuits.remove(c2)
+        connect_closest(flattened, circuits)
 
     sizes = [len(c) for c in circuits]
     sizes.sort(reverse=True)
 
     return sizes[0] * sizes[1] * sizes[2]
 
+def part2(flattened, circuits):
+    while len(circuits) > 1:
+        i, j = connect_closest(flattened, circuits)
+
+    return i, j
+
 def main():
     lines = lib.read_lines()
     points = [tuple(map(int, line.split(","))) for line in lines]
     size = len(points)
 
-    flattened = [(dsquared(points[i], points[j]), (i, j)) for i in range(size-1) for j in range(i+1, size)]
-    heapq.heapify(flattened)
+    distances = [(dsquared(points[i], points[j]), (i, j)) for i in range(size-1) for j in range(i+1, size)]
+    heapq.heapify(distances)
 
-    result1 = part1(flattened, 1000)
+    circuits = [{c} for c in range(size)]
+
+    result1 = part1(distances, circuits, 1000)
     print(result1)
 
-    result2 = 0
+    i, j = part2(distances, circuits)
+    result2 = points[i][0] * points[j][0]
     print(result2)
-
 
 if __name__ == "__main__":
     main()
