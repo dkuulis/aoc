@@ -35,14 +35,12 @@ def parse(lines):
     return tiles, grids
 
 def main():
-    lines = lib.read_lines("init")
+    lines = lib.read_lines()
     tiles, grids = parse(lines)
 
-    result1 = 0
+    size = [sum(sum(inner) for inner in outer) for outer in tiles]
+    result1 = sum(1 for g in grids if g[0][0]*g[0][1] > sum(size[i]*u for i, u in enumerate(g[1])))
     print(result1)
-
-    result2 = 0
-    print(result2)
 
 if __name__ == "__main__":
     main()
