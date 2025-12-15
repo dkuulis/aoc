@@ -8,12 +8,6 @@ from functools import reduce
 
 Machine = namedtuple('Machine', ["lights", "buttons", "joltages"])
 
-def iterate_with_rest(l):
-    for i in range(len(l)):
-        chosen = l[i]
-        rest = l[:i] + l[i+1:]
-        yield chosen, rest
-
 def parse(line):
 
     pattern = r"\[(?P<lights>[.#]+)\] (?P<buttons>[\d,\(\) ]+) \{(?P<joltages>[\d,]+)\}"
@@ -31,62 +25,33 @@ def parse(line):
 
     return Machine(lights, buttons, joltages)
 
-def part1(machine: Machine):
-    for r in range(len(machine.buttons) + 1):
-        for toggles in combinations(machine.buttons, r):
-            if machine.lights == reduce(operator.xor, toggles, set()):
+def part1(buttons: list[set[int]], lights: set[int]):
+    for r in range(len(buttons) + 1):
+        for toggles in combinations(buttons, r):
+            if lights == reduce(operator.xor, toggles, set()):
                 return r
 
-def count_pushes(buttons, joltages, best, previous):
+def part2(buttons: list[set[int]], joltages: list[int]):
 
-    if not buttons:
-        return sys.maxsize # no solution
+    result = 0
+    m = 1
+    while any(j for j in joltages if j > 0):
+        odds = {i for i, j in enumerate(joltages) if j & 1}
+        t = part1(buttons, odds)
+        result += m*t
+        m *= 2
+        joltages = [j // 2 for j in joltages]
 
-    button = buttons[0]
-    rest = buttons[1:]
-    remaining = list(joltages)
-    solution = previous + [0]
-
-    max_pushes = min(joltages[counter] for counter in button)
-    for pushes in range(max_pushes, -1, -1):
-
-        # new remaining joltages
-        for counter in button:
-            remaining[counter] = joltages[counter] - pushes
-
-        max_needed_j = max(remaining)
-        if pushes + max_needed_j >= best: # cannot improve
-            continue
-
-        solution[-1] = pushes
-        if max_needed_j > 0: # more push needed
-            pushes += count_pushes(rest, remaining, best - pushes, solution)
-        else: # already solution
-            print(solution)
-            pass
-
-        if pushes < best:
-            best = pushes
-
-    return best
-
-def part2(machine: Machine):
-    print("----")
-    descending = sorted(machine.buttons, reverse=True, key=lambda b: len(b))
-    remaining = list(machine.joltages)
-    result = count_pushes(descending, remaining, sys.maxsize, [])
-    if result == sys.maxsize:
-        print("xxxxxxx")
     return result
 
 def main():
     lines = lib.read_lines()
     machines = [parse(line) for line in lines]
 
-    result1 = sum(part1(machine) for machine in machines)
+    result1 = sum(part1(machine.buttons, machine.lights) for machine in machines)
     print(result1)
 
-    result2 = sum(part2(machine) for machine in machines)
+    result2 = sum(part2(machine.buttons, machine.joltages) for machine in machines)
     print(result2)
 
 if __name__ == "__main__":
