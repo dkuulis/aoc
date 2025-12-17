@@ -1,7 +1,7 @@
 import re
 import lib
 import sys
-import operator
+from functools import cache
 from collections import namedtuple
 from itertools import combinations
 from functools import reduce
@@ -14,35 +14,57 @@ def parse(line):
     m = re.match(pattern, line)
 
     lights_str = m["lights"]
-    lights = {i for i, c in enumerate(lights_str) if c  == "#"}
+    lights = tuple(int(c  == "#")for c in lights_str)
+
+    size = len(lights)
 
     buttons_re = r"\((?P<button>\d+(,\d+)*)\)"
     buttons_str = m["buttons"]
-    buttons = [set(map(int, b["button"].split(","))) for b in re.finditer(buttons_re, buttons_str)]
+    buttons_map = [set(map(int, b["button"].split(","))) for b in re.finditer(buttons_re, buttons_str)]
+    buttons = [tuple(int(i in b) for i in range(size)) for b in buttons_map]
 
     joltages_str = m["joltages"]
-    joltages = list(map(int, joltages_str.split(",")))
+    joltages = tuple(map(int, joltages_str.split(",")))
 
     return Machine(lights, buttons, joltages)
 
-def part1(buttons: list[set[int]], lights: set[int]):
+def part1(buttons: list[tuple[int, ...]], lights: tuple[int, ...]) -> int:
+    empty = (0,) * len(buttons[0])
     for r in range(len(buttons) + 1):
-        for toggles in combinations(buttons, r):
-            if lights == reduce(operator.xor, toggles, set()):
+        for selection in combinations(buttons, r):
+            if lights == reduce(lambda a, b: tuple(x ^ y for x, y in zip(a,b)), selection, empty):
                 return r
 
-def part2(buttons: list[set[int]], joltages: list[int]):
+def combine(buttons: list[tuple[int, ...]]) -> dict[tuple[int, ...], int]:
+    result = {}
 
-    result = 0
-    m = 1
-    while any(j for j in joltages if j > 0):
-        odds = {i for i, j in enumerate(joltages) if j & 1}
-        t = part1(buttons, odds)
-        result += m*t
-        m *= 2
-        joltages = [j // 2 for j in joltages]
+    empty = (0,) * len(buttons[0])
+    for r in range(len(buttons) + 1):
+        for selection in combinations(buttons, r):
+            pattern = reduce(lambda a, b: tuple(x + y for x, y in zip(a,b)), selection, empty)
+            result.setdefault(pattern, r)
 
     return result
+
+def part2(buttons: list[tuple[int, ...]], joltages: tuple[int, ...]) -> int:
+    costs = combine(buttons)
+
+    @cache
+    def solve(target: tuple[int, ...]) -> int:
+        if max(target) == 0:
+            return 0
+
+        result = sys.maxsize
+        for pattern, cost in costs.items():
+            if cost < result and all(a <= b and a & 1 == b & 1 for a, b in zip(pattern, target)):
+                next = tuple((b - a) // 2 for a, b in zip(pattern, target))
+                result = min(result, cost + 2 * solve(next))
+
+        return result
+    
+    r = solve(joltages)
+    print(joltages, r)
+    return r
 
 def main():
     lines = lib.read_lines()
