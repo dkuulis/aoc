@@ -58,13 +58,11 @@ def part2(buttons: list[tuple[int, ...]], joltages: tuple[int, ...]) -> int:
         for pattern, cost in costs.items():
             if cost < result and all(a <= b and a & 1 == b & 1 for a, b in zip(pattern, target)):
                 next = tuple((b - a) // 2 for a, b in zip(pattern, target))
-                result = min(result, cost + 2 * solve(next))
+                result = min(result, 2 * solve(next) + cost)
 
         return result
-    
-    r = solve(joltages)
-    print(joltages, r)
-    return r
+
+    return solve(joltages)
 
 def main():
     lines = lib.read_lines()
